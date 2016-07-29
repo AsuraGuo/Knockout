@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ko_binding</title>
+	<script type="text/javascript" src="./script/jquery-3.0.0.js"></script>
+    <script type="text/javascript" src="./script/knockout.js"></script>
+    <style>
+    	.profitWarning{
+    		text-align: center;
+    		border: 2px solid red;
+    		background-color: #cccccc; 
+    	}
+    </style>
+</head>
+<body>
+	<!-- 
+	visible 绑定
+	visible绑定到DOM元素上，使得该元素的hidden或visible状态取决于绑定的值。 
+	-->
+	<div data-bind="visible: shouldShowMessage">
+    You will see this message only when "shouldShowMessage" holds a true value.
+	</div>
+	<button id="btn_visible">出现</button>
+	<button id="btn_hidden">隐藏</button>
+	<hr>
+	<!--
+	text 绑定
+	text 绑定到DOM元素上，使得该元素显示的文本值为你绑定的参数。
+	该绑定在显示<span>或者<em>上非常有用，
+	但是你可以用在任何元素上。
+	-->
+	Today's message is: <span data-bind="text: myMessage"></span><br />
+	The item is <span data-bind="text: price() > 50 ? 'expensive' : 'affordable'"></span> today. 
+	<hr>
+	<!--
+	html 绑定
+	html绑定到DOM元素上，使得该元素显示的HTML值为你绑定的参数.
+	如果在你的view model里声明HTML标记并且render的话，那非常有用。 
+	-->
+	<div data-bind="html: details"></div> 
+	<hr>
+	<!-- css 绑定
+	css绑定是添加或删除一个或多个CSSclass到DOM元素上。非常有用，比如当数字变成负数时高亮显示。（注：如果你不想应用CSS class而是想引用style属性的话，请参考style绑定。）
+	-->
+	<div data-bind="css: { profitWarning: currentCssProfit() < 0 }">
+   		Profit Information<br />
+   	<button id="btn_css">变换css属性</button>
+	</div>
+	<hr>
+	<!-- style 绑定
+	style绑定是添加或删除一个或多个DOM元素上的style值。比如当数字变成负数时高亮显示，或者根据数字显示对应宽度的Bar。（注：如果你不是应用style值而是应用CSS class的话，请参考CSS绑定。）
+	-->
+	<div data-bind="style: { color: currentStyleProfit() < 0 ? 'red' : 'black' }">
+   		Profit Information
+   		<button id="btn_style">变换style属性</button>
+	</div>
+	<hr>
+	<!-- attr 绑定
+	attr 绑定提供了一种方式可以设置DOM元素的任何属性值。你可以设置img的src属性，连接的href属性。使用绑定，当模型属性改变的时候，它会自动更新。 
+	-->
+	<a data-bind="attr: { href: url, title: details }">
+    	Report
+	</a>
+	<hr>
+	<!-- 
+	click 绑定
+	click绑定在DOM元素上添加事件句柄以便元素被点击的时候执行定义的JavaScript函数。大部分是用在button，input和连接a上，但是可以在任意元素上使用。 
+	-->
+	<div>
+    	You've clicked <span data-bind="text: numberOfClicks"></span> times
+    	<button data-bind="click: incrementClickCounter">Click me</button>
+	</div>
+	<hr>
+	<!-- 
+	enable 绑定
+	enable绑定使DOM元素只有在参数值为true的时候才enabled。在form表单元素input，select，和textarea上非常有用。 
+	-->
+	<p>
+    	<input type='checkbox' data-bind="checked: hasCellphone"/>
+    	I have a cellphone
+	</p>
+	<p>
+    	Your cellphone number:
+    	<!-- 
+    	enable 主参数
+    	声明DOM元素是否可用enabled。
+    	非布尔值会被解析成布尔值。例如0和null被解析成false，21和非null对象被解析给true。如果你的参数是observable的，那绑定会随着observable值的改变而自动更新enabled/disabled状态。如果不是，则只会设置一次并且以后不再更新。 
+    	-->
+    	<input type='text' data-bind="value: cellphoneNumber, enable: hasCellphone"/>
+	</p>
+	<hr>
+	<!-- 
+	options绑定
+	options绑定控制什么样的options在drop-down列表里（例如：<select>）或者 multi-select 列表里
+	（例如：<select size='6'>）显示。此绑定不能用于<select>之外的元素。关联的数据应是数组（或者是observable数组），<select>会遍历显示数组里的所有的项。
+	注：对于multi-select列表，设置或者获取选择的多项需要使用selectedOptions绑定。对于single-select列表，你也可以使用value绑定读取或者设置元素的selected项。 
+	-->
+	<p>Destination country: 
+		<!-- Drop-down list -->
+		<select data-bind="options: availableCountries_D"></select>
+	</p>
+	<p>Choose some countries you'd like to visit: 
+		<!-- Multi-select list -->
+		<select data-bind="options: availableCountries_M" size="5" multiple="true"></select>
+	</p>
+
+
+
+	<script>
+		var viewModel = {
+			//如果参数是监控属性observable的，那元素的visible状态将根据参数值的变化而变化，如果不是，那元素的visible状态将只设置一次并且以后不在更新。
+	        shouldShowMessage: ko.observable(false) , // Message initially hidden
+
+	        //KO将参数值会设置在元素的innerText （IE）或textContent（Firefox和其它相似浏览器）属性上。原来的文本将会被覆盖。
+	        //如果参数是监控属性observable的，那元素的text文本将根据参数值的变化而更新，如果不是，那元素的text文本将只设置一次并且以后不在更新。
+    		//如果你传的是不是数字或者字符串（例如一个对象或者数组），那显示的文本将是yourParameter.toString()的等价内容。
+	        myMessage: ko.observable(),// Initially blank
+	        price:ko.observable(),
+
+	        //KO设置该参数值到元素的innerHTML属性上，元素之前的内容将被覆盖。
+    		//如果参数是监控属性observable的，那元素的内容将根据参数值的变化而更新，如果不是，那元素的内容将只设置一次并且以后不在更新。
+    		//如果你传的是不是数字或者字符串（例如一个对象或者数组），那显示的文本将是yourParameter.toString()的等价内容。
+	        details: ko.observable(), // Initially blank
+
+	        //该参数是一个JavaScript对象，属性是你的CSSclass名称，值是比较用的true或false，用来决定是否应该使用这个CSS class。
+	        //如果参数是监控属性observable的，那随着值的变化将会自动添加或者删除该元素上的CSSclass。如果不是，那CSS class将会只添加或者删除一次并且以后不在更新。
+	        //你可以使用任何JavaScript表达式或函数作为参数。KO将用它的执行结果来决定是否应用或删除CSS class。
+	        currentCssProfit: ko.observable(150000),// Positive value, so initially we don't apply the "profitWarning" class
+
+	        //该参数是一个JavaScript对象，属性是你的style的名称，值是该style需要应用的值。
+	        //如果参数是监控属性observable的，那随着值的变化将会自动添加或者删除该元素上的style值.如果不是那style值将会只应用一次并且以后不在更新。
+	        //你可以使用任何JavaScript表达式或函数作为参数.KO将用它的执行结果来决定是否应用或删除style值。
+	        currentStyleProfit: ko.observable(150000), // Positive value, so initially black
+
+	        //该参数是一个JavaScript对象，属性是你的attribute名称，值是该attribute需要应用的值。
+    		//如果参数是监控属性observable的，那随着值的变化将会自动添加或者删除该元素上的attribute值。如果不是，那attribute值将会只应用一次并且以后不在更新。
+	        url: ko.observable("www.baidu.com"),
+        	details: ko.observable("link to baidu"),
+
+        	numberOfClicks: ko.observable(0),
+        	incrementClickCounter: function () {
+            	var previousCount =this.numberOfClicks();
+            	this.numberOfClicks(previousCount +1);
+        	},
+
+        	hasCellphone: ko.observable(false),
+        	cellphoneNumber: "",
+
+
+        	availableCountries_D: ko.observableArray(['France', 'Germany', 'Spain']),
+        	//These are the initial options
+    		// ... then later ...
+    		availableCountries_M: ko.observableArray(['France', 'Germany', 'Spain'])
+
+	    };
+
+	    $("#btn_visible").click(function () {
+	    	viewModel.shouldShowMessage(true); //visible
+	    });
+	    $("#btn_hidden").click(function () {
+	    	viewModel.shouldShowMessage(false); //hidden
+	    });
+
+
+	    viewModel.myMessage("Hello, AsuraGuo!"); // Text appears
+	    //如果你想让你的text更可控，那选择是创建一个依赖监控属性（dependent observable），然后在它的执行函数里编码，决定应该显示什么样的text文本。
+	    viewModel.priceRating = ko.dependentObservable(function () {
+	    	return this.price() >50?"expensive" : "affordable";
+	    },viewModel);
+
+	    //因为该绑定设置元素的innerHTML，你应该注意不要使用不安全的HTML代码，因为有可能引起脚本注入攻击。如果你不确信是否安全（比如显示用户输入的内容），那你应该使用text绑定，因为这个绑定只是设置元素的text值innerText和textContent。
+	    viewModel.details("<em>For further details, view the report <a href='report.html'>here</a>.</em>");
+
+
+	    viewModel.availableCountries_D.push('China'); // Adds another option
+
+
+	    $("#btn_css").click(function () {
+	    	viewModel.currentCssProfit(-50);// Causes the "profitWarning" class to be applied
+	    }); 
+
+	    $("#btn_style").click(function () {
+	    	viewModel.currentStyleProfit(-50);// // Causes the DIV's contents to go red
+	    });
+	    
+	    ko.applyBindings(viewModel);
+	</script>
+</body>
+</html>

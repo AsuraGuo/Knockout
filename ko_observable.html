@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ko_observable</title>
+    <script type="text/javascript" src="./script/jquery-3.0.0.js"></script>
+    <script type="text/javascript" src="./script/knockout.js"></script>
+</head>
+<body>
+	<p>First name: <span data-bind="text: firstName"></span></p>
+	<p>Last name: <span data-bind="text: lastName"></span></p>
+	<p>Full name: <span data-bind="text: fullName"></span></p>
+	<h2>Hello, <input data-bind="value: fullName"/>!</h2>
+
+	<p>Enter bid price: <input data-bind="value: formattedPrice"/></p>
+
+	<p>Enter a numeric value: <input data-bind="value: attemptedValue"/></p>
+	<div data-bind="visible: !lastInputWasValid()">That's not a number!</div>
+
+
+<script>
+	var viewModel = {
+		firstName:ko.observable("Asura"),
+		lastName:ko.observable("Guo"),
+
+		price:ko.observable(23),
+
+		acceptedNumericValue: ko.observable(123),
+    	lastInputWasValid: ko.observable(true)
+	};
+
+
+	// viewModel.fullName = ko.dependentObservable(function () {
+	// 	return this.firstName() + " " +this.lastName();
+	// },viewModel);
+
+
+
+	viewModel.fullName = ko.dependentObservable({
+		read : function () {
+			return this.firstName() + " " +this.lastName();
+		},
+
+		write: function (value) {
+			var lastSpacePos = value.lastIndexOf(" ");
+			if (lastSpacePos > 0) {
+				this.firstName(value.slice(0,lastSpacePos));
+				this.lastName(value.slice(lastSpacePos+1));
+			}
+		},
+		owner: viewModel
+	});
+
+	viewModel.formattedPrice = ko.dependentObservable({
+	    read: function () {
+	        return "$" + this.price().toFixed(2);
+	    },
+
+	    write: function (value) {
+	        value = parseFloat(value.replace(/[^\.\d]/g,""));
+	        this.price(isNaN(value) ? 0 : value);
+	    },
+	    owner: viewModel
+	});
+
+	viewModel.attemptedValue = ko.dependentObservable({
+	    read: viewModel.acceptedNumericValue,
+	    write: function (value) {
+	        if (isNaN(value)){
+	            this.lastInputWasValid(false);
+	        }else {
+	            this.lastInputWasValid(true);
+	            this.acceptedNumericValue(value);
+	        }
+	    },
+	    owner: viewModel
+	});
+
+	ko.applyBindings(viewModel);
+</script>
+</body>
+</html>

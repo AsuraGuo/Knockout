@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>TemplateBinding</title>
+	<script type="text/javascript" src="./script/jquery-3.0.0.js"></script>
+    <script type="text/javascript" src="./script/knockout.js"></script>
+</head>
+<body>
+	<div data-bind='template: "personTemplate"'></div>
+	<script id='personTemplate' type='text/html'>
+	    ${ name } is ${ age } years old
+	    <hr>
+	    <button data-bind='click: makeOlder'>Make older</button>
+	</script> 
+
+	<script type='text/javascript'>
+	    var viewModel = {
+	        name: ko.observable('Bert'),
+	        age: ko.observable(78),
+	        makeOlder: function () {
+	            this.age(this.age() +1);
+	        }
+	    };
+	    ko.applyBindings(viewModel);
+	</script>
+</body>
+</html>
